@@ -1,9 +1,11 @@
-CREATE TABLE IF NOT EXISTS users(
-    id bigserial PRIMARY KEY,
-    created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
-    name text NOT NULL,
-    email citext UNIQUE NOT NULL, -- citext: case-insensitive text
-    password_hash bytea NOT NULL, -- bytea: binary string
-    activated bool NOT NULL,
-    version integer NOT NULL DEFAULT 1
-)
+CREATE EXTENSION IF NOT EXISTS citext;
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    name TEXT NOT NULL,
+    email CITEXT UNIQUE NOT NULL,         -- CITEXT: case-insensitive text
+    password_hash BYTEA NOT NULL,         -- BYTEA: binary string
+    activated BOOLEAN NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1
+);

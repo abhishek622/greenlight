@@ -166,3 +166,25 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 	}
 	return i
 }
+
+// this function help running any arbitrary function in the background
+func (app *application) background(fn func()) {
+	// increment waitGroup counter
+	app.wg.Add(1)
+
+	// launch background goroutine
+	go func() {
+		// decrement the waitGroup counter
+		defer app.wg.Done()
+
+		// recover any panic
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.Error(fmt.Sprintf("%v", err))
+			}
+		}()
+
+		// Execute the arbitrary function that we passed as the parameter
+		fn()
+	}()
+}
