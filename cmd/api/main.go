@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"expvar"
 	"flag"
-	"log"
+	"fmt"
 	"log/slog"
 	"os"
 	"runtime"
@@ -15,11 +15,13 @@ import (
 
 	"github.com/abhishek622/greenlight/internal/data"
 	"github.com/abhishek622/greenlight/internal/mailer"
-	"github.com/joho/godotenv"
+	"github.com/abhishek622/greenlight/internal/vcs"
 	_ "github.com/lib/pq"
 )
 
-const version = "1.0.0"
+var (
+	version = vcs.Version()
+)
 
 type config struct {
 	port int
@@ -58,10 +60,10 @@ type application struct {
 func main() {
 
 	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 	// declare instance of the config struct
 	var cfg config
 
@@ -69,7 +71,7 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	// db connection
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.DurationVar(&cfg.db.maxIdleTime, "db-max-idle-time", 15*time.Minute, "PostgreSQL max idle time")
@@ -92,7 +94,14 @@ func main() {
 		return nil
 	})
 
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
